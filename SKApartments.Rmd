@@ -1,0 +1,253 @@
+---
+title: "Apartment Hunting in South Korea"
+author: "Braden Barglind, Jonathan Oliveros, Stefano Subauste"
+date: ''
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstatix)
+```
+
+# Introduction
+
+&nbsp;&nbsp;&nbsp;&nbsp;Moving is always a hassle, and there are many different factors or reasons why people end up where they do. What this experiment aims to achieve is to find out the best apartment options within South Korea if someone decides to rent an apartment from there. Using the population of all apartments in South Korea, we will choose different meaningful variables such as sale price, square footage, floor of the apartment, and hallway type outside of the apartment. By choosing these, we aim to find any statistically significant locations that best represent the style of living a person is looking for. More specifically, sale price will often tend to be the dependent variable in our analyses, however we are interested in the relationships between independent variables as well. 
+We have a hypothesis that these variables have a direct relationship to how the price is set in each apartment. We believe that as square footage and floor increases, sale price will also increase. Another hypothesis is that the “terraced” hallways will be the most expensive, with “mixed” being second, and “other” being the cheapest. This is due to the fact that these variables are what is desired by the general population, which in turn drives demand for these stylistic choices.
+The population that our group is looking at is all apartments in South Korea that can be rented. The sampling unit is a single apartment in South Korea that can be rented. The four variables we would like to observe are Sale Price, Size, Floor, and Hallway Type. We will express Sales Price in terms of dollars, and Size in terms of square feet. Floor is simply just the floor number, so there is no unit attached to it. The categorical variable we chose, Hallway Type, has three levels; Terraced, Mixed, and Other. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;We brainstormed other variables we could have used in our analysis, and thought that it may be a good idea originally to use color of the building, as well as number of bathrooms and bedrooms. With these ideas, there were a few things we considered which altered our thought process. Getting the specific color of the building would be tough, and many/most apartments only have one bed and bathroom anyway, so our variable wouldn’t have much power. We would like to analyze the relationships between the Sale Price against the remaining three variables individually. In addition, we are interested in the relationship between Size and Floor, as well as Hallway Type and Size. We understood that we can’t gather this data ourselves, so we decided to find a dataset on Kaggle with the variables that are listed. 
+
+# Methods
+
+&nbsp;&nbsp;&nbsp;&nbsp;The population that our group is looking at is all apartments in South Korea that can be rented. The sampling unit is a single apartment in South Korea that can be rented. The four variables we would like to observe are Sale Price, Size, Floor, and Hallway Type. We will express Sales Price in terms of dollars, and Size in terms of square feet. Floor is simply just the floor number, so there is no unit attached to it. The categorical variable we chose, Hallway Type, has three levels; Terraced, Mixed, and Other. 
+This will be an observational study, due to the fact that apartments cannot be randomized. We are also not changing or manipulating any variables. Instead, we will use gathered survey data to make the experiments. The original data comes from this link:
+
+[koreahousedata](https://www.kaggle.com/datasets/gunhee/koreahousedata)
+
+Because there is a lot of unnecessary data included in the dataset, we cleaned up by removing the undesirable columns and ensured that there was no missing information in each row. The results of that can be found here:
+
+[Apartment data](https://docs.google.com/spreadsheets/d/1xADGVDmMDjF4Q1gp9SqwLu0g3omeygOpCLE2HHkw6nE/edit?usp=sharing)
+
+With this information we want to show that if given information on a new apartment, we can determine whether the place falls within the trend and would not be statistically significantly out of place with the rest of the apartments. This would help those that are trying to move into an apartment within South Korea.
+
+&nbsp;&nbsp;&nbsp;&nbsp;Our dataset is part of a census done by the Korean government. Therefore, they were conducting a controlled experiment, in which questions asked by the government can be the only questions answered. In our scenario, we are not necessarily assigning sampling units to specific treatments, rather we are collecting data on the treatments themselves. If we were to conduct this experiment, we would follow normal census procedures. This starts with either mailing out the questionnaires to each housing unit physically or providing a link to a website where they can fill out their responses. The questions asked on the survey include “What is the sales price of the apartment?”, “What floor is the apartment located on?”, and “What type of hallway does the apartment have outside your door?”.
+To determine the square footage of each department, the Korean government has another data set for those measurements of all units. It is not feasible to measure every single apartment in an accurate manner. If our group were to coordinate this experiment, we believe it’s possible to get a few hundred or more observations. There are tens to hundreds of units in a single apartment complex, so speed would be an advantage of ours as well. In the dataset we are working with off Kaggle, there are 5,892 observations, so there is no need to run the experiment ourselves. 
+
+# Exploratory Data Analysis
+
+```{r}
+apt.data <- read.csv('apartment data.csv', stringsAsFactors=T)
+summary(apt.data)
+```
+
+
+
+```{r}
+apt.data %>% ggplot(aes(x=HallwayType , y=SalePrice)) + 
+  geom_boxplot() +
+  scale_y_continuous(breaks = seq(0, 590000, by = 60000)) +
+  ggtitle("Boxplot of Sale Price by Hallway Type") +
+  xlab("Hallway Type") +
+  ylab("Sale Price")
+```
+
+```{r}
+apt.data %>% ggplot(aes(x=SalePrice)) + 
+  geom_histogram(bins=100) + 
+  scale_x_continuous(breaks = seq(0, 590000, by = 60000)) +
+  ggtitle("Sale Price Distribution")
+```
+
+```{r}
+apt.data %>% ggplot(aes(x=Size.sqf., y=SalePrice, color=HallwayType)) + 
+  geom_point() +
+  scale_y_continuous(breaks = seq(0, 590000, by = 60000)) +
+  ggtitle("SalePrice by Size of Apt and Hallway Type") + 
+  xlab("Size (square ft.)") +
+  ylab("Sale Price")
+```
+
+```{r}
+apt.data %>% ggplot(aes(x=Floor, y=SalePrice, color=HallwayType)) + 
+  scale_x_continuous(breaks = seq(1, 50, by = 4)) +
+  scale_y_continuous(breaks = seq(0, 590000, by = 60000)) +
+  geom_point() +
+  xlab("Floor of Apartment") +
+  ylab("Sale Price") +
+  ggtitle("Sale Price by Floor Level and Hallway Type")
+```
+
+```{r}
+apt.data %>% ggplot(aes(x=Floor, y=Size.sqf., color=HallwayType)) + 
+  scale_x_continuous(breaks = seq(1, 50, by = 4)) +
+  geom_point() +
+  xlab("Floor of Apartment") +
+  ylab("Size (square ft.)") +
+  ggtitle("Size of Apt by Floor and Hallway Type")
+
+```
+
+In the boxplot showing hallway type against sale price, it can be seen that there probably is a significant difference amongst the three. This was expected by the group. There are many outliers on the upper extremes as well, but that doesn’t tell us much as of right now. In the scatter plot of sale price, our group notices a right-skew, which is also expected, as most of these figures tend this way. We do not get much valuable information out of this specific plot, however. In the sale price by size of apartment and hallway type plot, we can see vertical trends at each size, which makes sense as there are groups of apartments that are built the same with their own features. It can be noted that “mixed” seems to have a high variance in the size of the apartments, and “terraced” also follows that trend, but just not as strong. “Corridor” hallways seem to be smaller with a lesser variance, as well. In the sale price by apartment type and floor plot, we notice a trend in which “terraced” hallways are located higher up, and “corridor” hallways are located lower. That puts “mixed” in the middle. A trend that may be significant is the association between sale price and floor. As the floor increases, from this plot it looks like the sale price also probably increases. After discussing as a group, this is something that tends to be true in most housing markets, as the views are better. In addition, the sale price is the highest for “terraced” hallways and lowest for “corridor” hallways. In the middle, again, is “mixed”. There is a clear cutoff price for each of these hallways, and it is believed to be statistically significant by looking at it. 
+
+## Priori Hypothesis
+
+&nbsp;&nbsp;&nbsp;&nbsp;One hypothesis test we are interested in performing is an ANOVA test for sale price against each hallway type. We believe there to be a difference, but knowing if there is or not would immensely help a customer looking for an apartment and getting the best deal. In addition, another ANOVA test that is possible to run is a test for size against hallway type to see if there is a difference there too. Our group believes that the means would differ due to the sample size of each hallway type and sale price. We guess that there is a significant difference between terrace and corridor. We also plan on using linear regression techniques, regression floor against sale price as well as size against sale price. We can do these both individually or combine them using multiple linear regression, which is probably the best in this scenario. Our hypothesis for this would be that the coefficients for both the variables would be positive, which would increase the sale price per 1 unit increase for both the variables. This means there is a positive correlation between the independent variables to sale price.
+
+
+# Results
+
+
+## ANOVA test
+
+* The continuous variable here will be the sale price of the apartments
+* The categorical is the hallway type associated with the apartments
+
+&nbsp;&nbsp;&nbsp;&nbsp;We know that because only one hallway type can be assigned to each apartment, the $k$ groups are independent of each other. Homoscedasticity cannot be assumed in this case, as it would be hard to determine how the variances between each group would be equal. Because this is census data, this is not truly a random sample. However, it still is predictive of housing in South Korea.
+
+Let $\mu_1$ = Corridor, $\mu_2$ = Mixed, $\mu_3$ = Terrace. Then our hypothesis is:
+
+$H_0:\mu_1=\mu_2=\mu_3$
+
+against
+
+$H_a:$ There exists some difference in the $\mu_j$'s
+
+
+```{r}
+oneway.test(data=apt.data, SalePrice~HallwayType)
+```
+
+Because the p-value is $<\alpha$, then we can reject $H_0$ and can conclude that there exists a significant difference between the sale price and the three levels.
+
+## Games Howell Test
+
+&nbsp;&nbsp;&nbsp;&nbsp;Because we cannot assume homoscedasticity, we will use the Games Howell test to determine the differences in means.
+Also by doing this, we can determine which means are the ones that caused the ANOVA null hypothesis to be rejected.
+Setting $\alpha = 0.05$ as our significance level we get the following:
+
+```{r}
+games_howell_test(data=apt.data, SalePrice~HallwayType, conf.level=.95)
+```
+
+From this, we can see that the ```p.adj``` column (which contains the p-values of the differences of each hallway type) has values smaller than $\alpha$. This proves the mean price for each category of hallway types has a statistical significance, in that the mean sale price all differ from each other.
+
+## Multi-Linear Regression
+
+* The response variable is the sale price of the apartment
+* The two continuous independent variables are the size of the apartment and the floor that the apartment resides on
+
+Let $\beta_1$ be slope of the regression line. Then the hypothesis is:
+
+$H_0: \beta_1=0$
+
+against
+
+$H_0: \beta_1\neq 0$
+
+Fitting the model, we get the summary as follows:
+
+```{r}
+model <- lm(data=apt.data, SalePrice ~ Size.sqf. + Floor)
+
+summary(model)
+
+```
+To see if the interaction term has an effect on the regression line, we make a separate model and compare the results
+
+```{r}
+inter.term.model <- lm(data=apt.data, SalePrice ~ Size.sqf. + Floor + Size.sqf.*Floor)
+
+summary(inter.term.model)
+```
+Because the p-value is greater than $\alpha$, then the effect of the interaction term is insignificant. Therefore, we can continue without using the interaction term.
+
+
+Next, we will look at the residual plot. 
+
+```{r}
+ggplot(model, aes(x=.fitted, y=.resid)) +
+ geom_point() +
+  xlab("Fitted Values") +
+  ylab("Residual") +
+  ggtitle("Residual plot of Sale Price")
+```
+
+From what we can see, there is a "fan" shape trend which means the variance assumption is not met, and it does not have homoscedasticity. To see if we can meet the criteria, we take the transform of the sale price and plotting its residuals. This is done by using $f(x)=\ln(x)$.
+
+```{r}
+apt.data["lnSalePrice"] = log(apt.data["SalePrice"])
+lnmodel <- lm(data=apt.data,lnSalePrice ~ Size.sqf. + Floor)
+summary(lnmodel)
+```
+
+```{r}
+ggplot(lnmodel, aes(x=.fitted, y=.resid)) +
+  geom_point() +
+  xlab("Fitted Values") +
+  ylab("Residual") +
+  ggtitle("Residual plot of Transformed Sale Price")
+```
+
+Looking at this residual plot, we can determine that transforming the sale price would not be a good choice to make. To make sure that the normality assumption is fulfilled, we make a normal Q-Q plot on the residuals. 
+
+```{r}
+ggplot(lnmodel, aes(sample=.stdresid)) +
+  geom_qq() + geom_qq_line() +
+  xlab("Theoretical Quantiles") +
+  ylab("Standardized Residuals") +
+  ggtitle("Normal Q-Q of Model")
+```
+
+It still does not fulfill the requirement, so to see why this is the case, we plot the residuals against the predictors (which in this case are the Size (square ft.) and Floor).
+
+```{r}
+ggplot(lnmodel, aes(x=Size.sqf., y=.resid)) +
+  geom_point() +
+  xlab("Size (square ft.)") +
+  ylab("Residual") +
+  ggtitle("Residual plot of Transformed Sale Price in Quadratic Form")
+```
+
+```{r}
+ggplot(lnmodel, aes(x=Floor, y=.resid)) +
+  geom_point() +
+  xlab("Floor") +
+  ylab("Residual") +
+  ggtitle("Residual plot of Transformed Sale Price in Quadratic Form")
+```
+
+Looking at these plots, we see that there is both a curvature and a "fan" shape that exists. Therefore to adjust for both, a quadratic transformation will be used
+
+Let $Y$ be the lnSalePrice transformation, $F$ be the Floor number, $S$ be the size of the apartment in square feet. Then we can say
+
+$Y=\beta_0+\beta_1\cdot S+\beta_2\cdot S^2+\beta_3\cdot F+\beta_4 \cdot F^2+\epsilon$
+
+is our quadratic transformation regression model.
+
+```{r}
+quad.model <- lm(lnSalePrice ~ Size.sqf. + I(Size.sqf.^2) + Floor + I(Floor^2), data = apt.data)
+summary(quad.model)
+```
+
+With this new transformation, we plot the residuals and the Q-Q plot
+
+```{r}
+ggplot(quad.model, aes(x=.fitted, y=.resid)) +
+  geom_point() +
+  xlab("Fitted Values") +
+  ylab("Residual") +
+  ggtitle("Residual plot of Transformed Sale Price in Quadratic Form")
+```
+
+```{r}
+ggplot(quad.model, aes(sample=.stdresid)) +
+  geom_qq() + geom_qq_line() +
+  xlab("Theoretical Quantiles") +
+  ylab("Standardized Residuals") +
+  ggtitle("Normal Q-Q of Model in Quadratic Form")
+```
+
+We see that the assumptions are met from the residual plots and from the Q-Q plot. Therefore we can use the output from our regression model without the interaction term as it proved to be insignificant towards the sale price. On top of that, we can conclude that the quadratic transformation made a significant difference in the regression model, which still shows our p-value to be $<\alpha$; therefore we can reject $H_0$.
